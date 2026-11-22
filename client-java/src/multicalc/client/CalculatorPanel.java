@@ -16,6 +16,7 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import multicalc.engine.CalculatorEngine;
 
 final class CalculatorPanel extends JPanel {
     private static final long serialVersionUID = 1L;

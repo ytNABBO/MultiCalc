@@ -1,20 +1,20 @@
-package multicalc.client;
+package multicalc.engine;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
-final class CalculatorEngine {
+public final class CalculatorEngine {
     private static final int TIMEOUT_SECONDS = 5;
 
     private final Path executable;
 
-    CalculatorEngine(Path executable) {
+    public CalculatorEngine(Path executable) {
         this.executable = executable.toAbsolutePath();
     }
 
-    String calculate(String expression) throws IOException, InterruptedException {
+    public String calculate(String expression) throws IOException, InterruptedException {
         Process process;
         try {
             process = new ProcessBuilder(executable.toString(), expression).start();

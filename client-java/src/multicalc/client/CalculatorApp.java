@@ -4,6 +4,7 @@ import java.awt.GraphicsEnvironment;
 import java.nio.file.Path;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+import multicalc.engine.CalculatorEngine;
 
 public final class CalculatorApp {
     private CalculatorApp() {}
