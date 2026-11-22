@@ -40,7 +40,7 @@ header('Cache-Control: no-store');
 </head>
 <body>
     <header class="topbar">
-        <div class="container wordmark">MultiCalc</div>
+        <div class="container"><a class="wordmark" href="../">MultiCalc</a></div>
     </header>
     <main class="container content">
         <h1>Calculation history</h1>

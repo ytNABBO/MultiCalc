@@ -14,11 +14,11 @@ The calculation engine is written in C++ and runs from the command line. It unde
 
 My Java TCP server runs the same engine for several users at a time with a thread pool. My Java Swing and C# WPF desktop apps send expressions to the server and display the results or errors they receive. The Python load tester uses the same protocol. [TCP protocol specification](docs/protocol.md)
 
-My PHP API accepts expressions over HTTP, forwards them to the Java server, and returns results or errors as JSON. I'll build a browser calculator in HTML, CSS, and JavaScript that uses this API.
+My browser calculator uses HTML, CSS, and JavaScript. It sends expressions to the PHP API, which forwards them to the Java server and returns results or errors as JSON.
 
 ## Calculation history
 
-My Java server can save calculation history to MySQL through JDBC. It keeps answering requests during a database outage. My PHP dashboard shows history across clients, daily activity, the most frequent expressions, and the error rate. The browser calculator will show a local history.
+My Java server can save calculation history to MySQL through JDBC. It keeps answering requests during a database outage. My PHP dashboard shows history across clients, daily activity, the most frequent expressions, and the error rate. The browser calculator also saves recent results locally.
 
 ## What I want to test
 
@@ -177,3 +177,9 @@ php -S 127.0.0.1:8080 -t web-php-mysql
 ```
 
 Open `http://127.0.0.1:8080/dashboard/`. The dashboard charts the last seven UTC days, ranks the five most frequent expressions across all history, and shows 25 calculations per history page. Load `database/sample-data.sql` to explore it with example rows.
+
+## Run the browser calculator
+
+Start the Java TCP server and PHP server as above, then open `http://127.0.0.1:8080/`. Type an expression or use the keypad. Press Enter in the expression field or select `=` to calculate.
+
+The browser saves the last 20 successful calculations. Select a recent calculation to reuse its expression, or select **Clear history** to remove the saved calculations from this browser.

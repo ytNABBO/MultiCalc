@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Calculator | MultiCalc</title>
+    <link rel="stylesheet" href="assets/calculator.css">
+    <script src="assets/calculator.js" defer></script>
+</head>
+<body>
+    <header class="topbar">
+        <nav class="container navigation" aria-label="MultiCalc">
+            <a class="wordmark" href="./" aria-current="page">MultiCalc</a>
+            <a class="dashboard-link" href="dashboard/">History dashboard</a>
+        </nav>
+    </header>
+
+    <main class="container content">
+        <h1>Calculator</h1>
+        <div class="workspace">
+            <form id="calculator-form" class="panel calculator" method="post">
+                <div class="display">
+                    <label for="expression">Expression</label>
+                    <input id="expression" name="expression" type="text" autocomplete="off"
+                           spellcheck="false" placeholder="2 + 3 * (4 - 1)">
+                    <div class="result-row">
+                        <span id="result-label">Result</span>
+                        <output id="result" for="expression" aria-labelledby="result-label">—</output>
+                    </div>
+                </div>
+
+                <div id="keypad" class="keypad" role="group" aria-label="Calculator keypad">
+                    <button type="button" class="utility" data-key="clear">Clear</button>
+                    <button type="button" class="utility" data-key="backspace" aria-label="Backspace">⌫</button>
+                    <button type="button" class="operator" data-key="(" aria-label="Open parenthesis">(</button>
+                    <button type="button" class="operator" data-key=")" aria-label="Close parenthesis">)</button>
+                    <button type="button" data-key="7">7</button>
+                    <button type="button" data-key="8">8</button>
+                    <button type="button" data-key="9">9</button>
+                    <button type="button" class="operator" data-key="/" aria-label="Divide">÷</button>
+                    <button type="button" data-key="4">4</button>
+                    <button type="button" data-key="5">5</button>
+                    <button type="button" data-key="6">6</button>
+                    <button type="button" class="operator" data-key="*" aria-label="Multiply">×</button>
+                    <button type="button" data-key="1">1</button>
+                    <button type="button" data-key="2">2</button>
+                    <button type="button" data-key="3">3</button>
+                    <button type="button" class="operator" data-key="-" aria-label="Subtract">−</button>
+                    <button type="button" data-key="0">0</button>
+                    <button type="button" data-key="." aria-label="Decimal point">.</button>
+                    <button type="submit" class="equals" aria-label="Calculate">=</button>
+                    <button type="button" class="operator" data-key="+" aria-label="Add">+</button>
+                </div>
+
+                <p id="calculator-status" class="status" role="status"></p>
+            </form>
+
+            <aside class="panel history" aria-labelledby="history-heading">
+                <div class="history-heading">
+                    <h2 id="history-heading">Recent calculations</h2>
+                    <button id="clear-history" class="clear-history" type="button" disabled>Clear history</button>
+                </div>
+                <p id="history-empty" class="empty">No calculations yet.</p>
+                <ol id="history-list" class="history-list"></ol>
+            </aside>
+        </div>
+    </main>
+</body>
+</html>
