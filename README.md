@@ -12,7 +12,7 @@ My first release includes the C++ command-line calculator and the Java Swing des
 
 The calculation engine is written in C++ and runs from the command line. It understands operator precedence, parentheses, and unary minus, and gives clear errors when an expression is invalid or tries to divide by zero.
 
-My Java TCP server runs the same engine for several users at a time with a thread pool. My Swing desktop app sends expressions to the server and displays the results or errors it receives. I'll add a C# WPF desktop client and a Python command-line client that use the same protocol. [TCP protocol specification](docs/protocol.md)
+My Java TCP server runs the same engine for several users at a time with a thread pool. My Java Swing and C# WPF desktop apps send expressions to the server and display the results or errors they receive. I'll add a Python command-line client that uses the same protocol. [TCP protocol specification](docs/protocol.md)
 
 For the web version, I'll build a calculator in HTML, CSS, and JavaScript. It will send expressions to a PHP API, which will pass them to the Java server and return the result or error as JSON.
 
@@ -87,3 +87,13 @@ java -cp client-java/out multicalc.client.CalculatorApp
 ```
 
 Type an expression or use the keypad, then press Enter or `=`. The client opens a connection for each calculation and uses `127.0.0.1:5050` by default. Pass the host and port as arguments to connect to another server.
+
+## Run the C# WPF client
+
+With the TCP server running, use the .NET 10 SDK on Windows to launch the client from the repository root.
+
+```powershell
+dotnet run --project client-csharp/MultiCalc.Client.csproj
+```
+
+Type an expression or use the keypad, then press Enter or `=`. The client connects to `127.0.0.1:5050` by default. To use a different server, append `--` followed by the host and port to the command.
