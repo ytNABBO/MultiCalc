@@ -26,6 +26,7 @@ public final class CalculatorServer implements AutoCloseable {
 
     private final ServerSocket listener;
     private final CalculatorEngine engine;
+    private final ServerStats stats = new ServerStats();
     private final ExecutorService workers = new ThreadPoolExecutor(
             WORKERS, WORKERS, 0, TimeUnit.SECONDS, new ArrayBlockingQueue<>(QUEUE_CAPACITY));
     private final Set<Socket> connections = ConcurrentHashMap.newKeySet();
@@ -100,7 +101,7 @@ public final class CalculatorServer implements AutoCloseable {
 
     private void handle(Socket connection) {
         try {
-            new ClientSession(connection, engine, stopping::get).run();
+            new ClientSession(connection, engine, stats, stopping::get).run();
         } finally {
             connections.remove(connection);
         }
@@ -119,6 +120,7 @@ public final class CalculatorServer implements AutoCloseable {
 
         try {
             if (workers.awaitTermination(SHUTDOWN_GRACE_SECONDS, TimeUnit.SECONDS)) {
+                stats.printSummary(System.out);
                 return;
             }
         } catch (InterruptedException error) {
