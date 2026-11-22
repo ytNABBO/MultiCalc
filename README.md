@@ -18,7 +18,7 @@ I want the Java server to save calculations to MySQL through JDBC while continui
 
 ## What I want to test
 
-I'll write unit tests for the C++ parser and use Python to check that the engine gives the expected answers as the project grows. I also want to simulate clients using the server at the same time and measure response times and errors. I'll use GitHub Actions to run the automated checks and keep notes on what I learn for my final exam.
+I use C++ unit tests to check parsing and arithmetic. I'll add Python tests for the command-line interface as the project grows. I also want to simulate clients using the server at the same time and measure response times and errors. I'll use GitHub Actions to run the automated checks and keep notes on what I learn for my final exam.
 
 ## Run the C++ calculator
 
@@ -32,3 +32,13 @@ g++ -std=c++17 core-cpp/main.cpp core-cpp/parser.cpp core-cpp/calculator.cpp -o 
 This prints `11`. The CLI takes one quoted expression and supports `+`, `-`, `*`, `/`, parentheses, unary minus, decimals, and scientific notation. It uses double-precision floating-point arithmetic. Errors go to stderr with exit status `1` for invalid calculations or `2` for incorrect usage.
 
 Inside `core-cpp/`, `main.cpp` handles command-line arguments and output, `parser.cpp` builds the expression tree defined in `expression.h`, and `calculator.cpp` evaluates it.
+
+## Run the C++ unit tests
+
+Build and run the test executable from the repository root.
+
+```sh
+g++ -std=c++17 -Icore-cpp core-cpp/tests/calculator_tests.cpp \
+    core-cpp/parser.cpp core-cpp/calculator.cpp -o calc-tests
+./calc-tests
+```
