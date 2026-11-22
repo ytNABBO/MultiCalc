@@ -6,7 +6,7 @@ I'm using this project to bring together the languages and tools I study at scho
 
 ## How I want it to work
 
-The calculation engine is written in C++ and runs from the command line. It understands operator precedence, parentheses, and unary minus, and gives clear errors when an expression is invalid or tries to divide by zero. My first desktop client will use Java Swing and run the C++ program directly.
+The calculation engine is written in C++ and runs from the command line. It understands operator precedence, parentheses, and unary minus, and gives clear errors when an expression is invalid or tries to divide by zero. My Java Swing desktop client runs the C++ program directly and displays its results or errors.
 
 I'll build a Java TCP server that runs the engine for several users at the same time. A thread pool will handle concurrent connections. I'll connect the Swing app to the server and build a second desktop client in C# with WPF. A Python command-line client will use the same protocol, sending an expression and receiving either a result or an error.
 
@@ -52,3 +52,14 @@ python3 tools-python/regression.py ./calc tools-python/cases.txt
 ```
 
 Each nonblank line in the case file contains an expression and its expected numeric result, such as `2+3*(4-1);11`. The runner compares results with a relative tolerance of `1e-12`, reports any failed case by line number, and exits with status `1` if a case fails or `2` if it cannot read the cases or launch the calculator.
+
+## Run the Java Swing client
+
+Build `calc` first, then use JDK 17 or later to compile the client from the repository root.
+
+```sh
+javac --release 17 -d client-java/out client-java/src/multicalc/client/*.java
+java -cp client-java/out multicalc.client.CalculatorApp ./calc
+```
+
+Type an expression or enter it with the buttons, then press Enter or `=`. The client uses `./calc` by default. Pass a different path as the first argument if the executable is elsewhere.
