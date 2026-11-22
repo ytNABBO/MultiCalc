@@ -4,6 +4,10 @@ I want to build a calculator that I can use from a desktop app, a terminal, or a
 
 I'm using this project to bring together the languages and tools I study at school. I want to see how a parser, a network service, a database, and different user interfaces can work together in one application.
 
+## v0.1.0
+
+My first release includes the C++ command-line calculator and the Java Swing desktop client. The C++ unit tests check the parser and arithmetic, and the Python regression cases check the result printed by the compiled calculator. The build, run, and test commands are below.
+
 ## How I want it to work
 
 The calculation engine is written in C++ and runs from the command line. It understands operator precedence, parentheses, and unary minus, and gives clear errors when an expression is invalid or tries to divide by zero. My Java Swing desktop client runs the C++ program directly and displays its results or errors.
