@@ -14,7 +14,7 @@ The calculation engine is written in C++ and runs from the command line. It unde
 
 My Java TCP server runs the same engine for several users at a time with a thread pool. My Java Swing and C# WPF desktop apps send expressions to the server and display the results or errors they receive. The Python load tester uses the same protocol. [TCP protocol specification](docs/protocol.md)
 
-For the web version, I'll build a calculator in HTML, CSS, and JavaScript. It will send expressions to a PHP API, which will pass them to the Java server and return the result or error as JSON.
+My PHP API accepts expressions over HTTP, forwards them to the Java server, and returns results or errors as JSON. I'll build a browser calculator in HTML, CSS, and JavaScript that uses this API.
 
 ## Calculation history
 
@@ -142,3 +142,23 @@ java -cp 'server-java/out:/path/to/mysql-connector-j-9.7.0.jar' multicalc.server
 ```
 
 Set `MULTICALC_DB_URL` to enable persistence. A background writer opens one connection per insert and closes it afterward. Each row records the UTC time when the calculation finished. During an outage, the server keeps replying and skips failed writes. When MySQL recovers, new calculations can be saved again. The queue holds up to 128 waiting rows, and the server skips new rows if the queue fills. It gives queued writes up to five seconds to finish during shutdown.
+
+## Run the PHP calculator API
+
+Start the Java TCP server. From the repository root, start a local PHP 8 server with `web-php-mysql` as its document root. With XAMPP on Linux, use `/opt/lampp/bin/php` for the PHP command.
+
+```sh
+php -S 127.0.0.1:8080 -t web-php-mysql
+```
+
+In another terminal, send a calculation to `POST /api/calculate.php`.
+
+```sh
+curl -H 'Content-Type: application/json' \
+    -d '{"expression":"2+3*(4-1)"}' \
+    http://127.0.0.1:8080/api/calculate.php
+```
+
+A successful request returns `{"result":"11"}` with status `200`. The result stays a string to preserve the engine's formatting. Errors return an `error` string. Use `400` for invalid input, `405` for another method, `413` for oversized requests, `415` for an invalid content type, and `422` for a calculation the Java server rejects. An unavailable or invalid upstream response returns `502`. A TCP read or write timeout returns `504`.
+
+The PHP API connects to `127.0.0.1:5050` by default. Set `MULTICALC_TCP_HOST` and `MULTICALC_TCP_PORT` before starting PHP to use another calculator server.
