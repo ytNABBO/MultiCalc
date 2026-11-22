@@ -14,12 +14,15 @@ final class ClientSession implements Runnable {
     private final Socket socket;
     private final CalculatorEngine engine;
     private final ServerStats stats;
+    private final CalculationHistory history;
     private final BooleanSupplier stopping;
 
-    ClientSession(Socket socket, CalculatorEngine engine, ServerStats stats, BooleanSupplier stopping) {
+    ClientSession(Socket socket, CalculatorEngine engine, ServerStats stats,
+                  CalculationHistory history, BooleanSupplier stopping) {
         this.socket = socket;
         this.engine = engine;
         this.stats = stats;
+        this.history = history;
         this.stopping = stopping;
     }
 
@@ -52,19 +55,24 @@ final class ClientSession implements Runnable {
     }
 
     private void calculate(OutputStream output, String expression) throws IOException, InterruptedException {
-        var client = socket.getInetAddress();
         String result;
         try {
             result = engine.calculate(expression);
         } catch (IOException failure) {
-            stats.recordCalculation(client, false);
+            recordOutcome(expression, null);
             String message = failure.getMessage();
             Protocol.writeError(output, message != null && message.startsWith(ENGINE_ERROR_PREFIX)
                     ? message.substring(ENGINE_ERROR_PREFIX.length())
                     : "Calculation failed");
             return;
         }
-        stats.recordCalculation(client, true);
+        recordOutcome(expression, result);
         Protocol.writeResult(output, result);
+    }
+
+    private void recordOutcome(String expression, String result) {
+        var client = socket.getInetAddress();
+        stats.recordCalculation(client, result != null);
+        history.record(client, expression, result);
     }
 }

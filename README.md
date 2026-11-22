@@ -18,7 +18,7 @@ For the web version, I'll build a calculator in HTML, CSS, and JavaScript. It wi
 
 ## Calculation history
 
-The MySQL schema is ready for calculation history. I want the Java server to save calculations through JDBC while continuing to answer requests if the database is temporarily unavailable. The browser calculator will show a local history. A PHP dashboard will show the history across clients and let me see how often the calculator is used, which expressions are common, and how many requests return errors.
+My Java server can save calculation history to MySQL through JDBC. It keeps answering requests during a database outage. The browser calculator will show a local history. A PHP dashboard will show the history across clients and let me see how often the calculator is used, which expressions are common, and how many requests return errors.
 
 ## What I want to test
 
@@ -127,3 +127,18 @@ mysql -u root -p < database/sample-data.sql
 ```
 
 The table defaults `created_at` to UTC and keeps successful results as the engine printed them, including signed zero and scientific notation. Failed calculations store `NULL` for `result`. Use `INET6_NTOA(client_ip)` to display the stored IPv4 or IPv6 address.
+
+### Enable history in the Java server
+
+Apply the schema and build the Java server as above. Use a MySQL account with `INSERT` access to `multicalc.calculations` and add the JDBC driver to the runtime classpath. The example uses Connector/J 9.7.0. [Connector/J download](https://repo.maven.apache.org/maven2/com/mysql/mysql-connector-j/9.7.0/mysql-connector-j-9.7.0.jar)
+
+```bash
+export MULTICALC_DB_URL='jdbc:mysql://127.0.0.1:3306/multicalc'
+export MULTICALC_DB_USER='your_mysql_user'
+read -rsp 'MySQL password: ' MULTICALC_DB_PASSWORD
+printf '\n'
+export MULTICALC_DB_PASSWORD
+java -cp 'server-java/out:/path/to/mysql-connector-j-9.7.0.jar' multicalc.server.CalculatorServer
+```
+
+Set `MULTICALC_DB_URL` to enable persistence. A background writer opens one connection per insert and closes it afterward. Each row records the UTC time when the calculation finished. During an outage, the server keeps replying and skips failed writes. When MySQL recovers, new calculations can be saved again. The queue holds up to 128 waiting rows, and the server skips new rows if the queue fills. It gives queued writes up to five seconds to finish during shutdown.

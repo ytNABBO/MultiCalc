@@ -26,6 +26,7 @@ public final class CalculatorServer implements AutoCloseable {
 
     private final ServerSocket listener;
     private final CalculatorEngine engine;
+    private final CalculationHistory history = CalculationHistory.fromEnvironment();
     private final ServerStats stats = new ServerStats();
     private final ExecutorService workers = new ThreadPoolExecutor(
             WORKERS, WORKERS, 0, TimeUnit.SECONDS, new ArrayBlockingQueue<>(QUEUE_CAPACITY));
@@ -101,7 +102,7 @@ public final class CalculatorServer implements AutoCloseable {
 
     private void handle(Socket connection) {
         try {
-            new ClientSession(connection, engine, stats, stopping::get).run();
+            new ClientSession(connection, engine, stats, history, stopping::get).run();
         } finally {
             connections.remove(connection);
         }
@@ -118,17 +119,20 @@ public final class CalculatorServer implements AutoCloseable {
         // Unblock idle reads while allowing in-progress calculations to write their replies.
         connections.forEach(CalculatorServer::stopReading);
 
+        boolean drained = false;
         try {
-            if (workers.awaitTermination(SHUTDOWN_GRACE_SECONDS, TimeUnit.SECONDS)) {
-                stats.printSummary(System.out);
-                return;
-            }
+            drained = workers.awaitTermination(SHUTDOWN_GRACE_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException error) {
             Thread.currentThread().interrupt();
         }
 
-        workers.shutdownNow();
-        connections.forEach(CalculatorServer::closeQuietly);
+        if (drained) {
+            stats.printSummary(System.out);
+        } else {
+            workers.shutdownNow();
+            connections.forEach(CalculatorServer::closeQuietly);
+        }
+        history.close();
     }
 
     private static void stopReading(Socket connection) {
