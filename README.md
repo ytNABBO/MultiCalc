@@ -109,3 +109,5 @@ python3 tools-python/load_test.py --clients 10 --requests-per-client 10 --seed 1
 Each client keeps its own connection and sends one expression at a time. Repeat with the same client count, request count, and seed to replay the workload. Use `--host` and `--port` to change the default endpoint `127.0.0.1:5050`.
 
 The report shows successful, failed, and skipped requests, throughput, and response times for successful calculations. A connection or protocol failure ends that client's session and skips any remaining requests. A failed or skipped request gives the command exit status `1`.
+
+[Concurrency results for 1, 10, 50, and 100 clients](docs/concurrency-report.md)
