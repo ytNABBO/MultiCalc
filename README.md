@@ -25,8 +25,10 @@ I'll write unit tests for the C++ parser and use Python to check that the engine
 Build and run it from the repository root with a C++17 compiler.
 
 ```sh
-g++ -std=c++17 core-cpp/main.cpp -o calc
+g++ -std=c++17 core-cpp/main.cpp core-cpp/parser.cpp core-cpp/calculator.cpp -o calc
 ./calc "2 + 3 * (4 - 1)"
 ```
 
 This prints `11`. The CLI takes one quoted expression and supports `+`, `-`, `*`, `/`, parentheses, unary minus, decimals, and scientific notation. It uses double-precision floating-point arithmetic. Errors go to stderr with exit status `1` for invalid calculations or `2` for incorrect usage.
+
+Inside `core-cpp/`, `main.cpp` handles command-line arguments and output, `parser.cpp` builds the expression tree defined in `expression.h`, and `calculator.cpp` evaluates it.
