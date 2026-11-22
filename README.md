@@ -18,7 +18,7 @@ For the web version, I'll build a calculator in HTML, CSS, and JavaScript. It wi
 
 ## Calculation history
 
-I want the Java server to save calculations to MySQL through JDBC while continuing to answer requests if the database is temporarily unavailable. The browser calculator will show a local history. A PHP dashboard will show the history across clients and let me see how often the calculator is used, which expressions are common, and how many requests return errors.
+The MySQL schema is ready for calculation history. I want the Java server to save calculations through JDBC while continuing to answer requests if the database is temporarily unavailable. The browser calculator will show a local history. A PHP dashboard will show the history across clients and let me see how often the calculator is used, which expressions are common, and how many requests return errors.
 
 ## What I want to test
 
@@ -111,3 +111,19 @@ Each client keeps its own connection and sends one expression at a time. Repeat 
 The report shows successful, failed, and skipped requests, throughput, and response times for successful calculations. A connection or protocol failure ends that client's session and skips any remaining requests. A failed or skipped request gives the command exit status `1`.
 
 [Concurrency results for 1, 10, 50, and 100 clients](docs/concurrency-report.md)
+
+## Set up MySQL history
+
+Use MySQL 8.0.16 or later. From the repository root, run the schema with a database account that can create the `multicalc` database and its `calculations` table.
+
+```sh
+mysql -u root -p < database/schema.sql
+```
+
+To explore the schema locally, load the sample history. Each run appends six example rows.
+
+```sh
+mysql -u root -p < database/sample-data.sql
+```
+
+The table defaults `created_at` to UTC and keeps successful results as the engine printed them, including signed zero and scientific notation. Failed calculations store `NULL` for `result`. Use `INET6_NTOA(client_ip)` to display the stored IPv4 or IPv6 address.
