@@ -10,9 +10,9 @@ My first release includes the C++ command-line calculator and the Java Swing des
 
 ## How I want it to work
 
-The calculation engine is written in C++ and runs from the command line. It understands operator precedence, parentheses, and unary minus, and gives clear errors when an expression is invalid or tries to divide by zero. My Java Swing desktop client runs the C++ program directly and displays its results or errors.
+The calculation engine is written in C++ and runs from the command line. It understands operator precedence, parentheses, and unary minus, and gives clear errors when an expression is invalid or tries to divide by zero.
 
-My Java TCP server runs the same engine for several users at a time with a thread pool. I'll connect the Swing app to the server and build a second desktop client in C# with WPF. A Python command-line client will use the same protocol to send expressions and receive results or errors. [TCP protocol specification](docs/protocol.md)
+My Java TCP server runs the same engine for several users at a time with a thread pool. My Swing desktop app sends expressions to the server and displays the results or errors it receives. I'll add a C# WPF desktop client and a Python command-line client that use the same protocol. [TCP protocol specification](docs/protocol.md)
 
 For the web version, I'll build a calculator in HTML, CSS, and JavaScript. It will send expressions to a PHP API, which will pass them to the Java server and return the result or error as JSON.
 
@@ -57,18 +57,6 @@ python3 tools-python/regression.py ./calc tools-python/cases.txt
 
 Each nonblank line in the case file contains an expression and its expected numeric result, such as `2+3*(4-1);11`. The runner compares results with a relative tolerance of `1e-12`, reports any failed case by line number, and exits with status `1` if a case fails or `2` if it cannot read the cases or launch the calculator.
 
-## Run the Java Swing client
-
-Build `calc` first, then use JDK 17 or later to compile the client from the repository root.
-
-```sh
-javac --release 17 -d client-java/out \
-    engine-java/src/multicalc/engine/*.java client-java/src/multicalc/client/*.java
-java -cp client-java/out multicalc.client.CalculatorApp ./calc
-```
-
-Type an expression or enter it with the buttons, then press Enter or `=`. The client uses `./calc` by default. Pass a different path as the first argument if the executable is elsewhere.
-
 ## Run the Java TCP server
 
 Build `calc` first, then compile and start the server from the repository root with JDK 17 or later.
@@ -88,3 +76,14 @@ Send `CALC 2+3*(4-1)` followed by a newline to receive `OK 11`. Send another req
 After a graceful shutdown, the server prints successful and failed calculation counts for the whole run and for each client IP address. A calculation counts once the engine produces a result or reports an error. The counters start at zero each time the server starts.
 
 Worker threads increment the global `AtomicLong` counters concurrently. `ConcurrentHashMap.merge` updates each client's counts atomically, even when several connections come from the same address. The server prints the summary after the worker pool drains so both sets of counts reflect the same completed calculations.
+
+## Run the Java Swing client
+
+With the TCP server running, compile and launch the client from the repository root with JDK 17 or later.
+
+```sh
+javac --release 17 -d client-java/out client-java/src/multicalc/client/*.java
+java -cp client-java/out multicalc.client.CalculatorApp
+```
+
+Type an expression or use the keypad, then press Enter or `=`. The client opens a connection for each calculation and uses `127.0.0.1:5050` by default. Pass the host and port as arguments to connect to another server.

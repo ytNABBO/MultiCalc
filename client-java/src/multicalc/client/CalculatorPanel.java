@@ -16,7 +16,6 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import multicalc.engine.CalculatorEngine;
 
 final class CalculatorPanel extends JPanel {
     private static final long serialVersionUID = 1L;
@@ -29,15 +28,15 @@ final class CalculatorPanel extends JPanel {
         "0", ".", "=", "+"
     };
 
-    private final transient CalculatorEngine engine;
+    private final transient TcpCalculatorClient client;
     private final JTextField expression = new JTextField(24);
     private final JTextField result = new JTextField(24);
     private final JTextArea status = new JTextArea(2, 24);
     private final JPanel keypad = new JPanel(new GridLayout(0, 4, 8, 8));
 
-    CalculatorPanel(CalculatorEngine engine) {
+    CalculatorPanel(TcpCalculatorClient client) {
         super(new BorderLayout(0, 12));
-        this.engine = engine;
+        this.client = client;
         setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
 
         expression.setFont(expression.getFont().deriveFont(20f));
@@ -137,8 +136,8 @@ final class CalculatorPanel extends JPanel {
         status.setText("Calculating…");
         new SwingWorker<String, Void>() {
             @Override
-            protected String doInBackground() throws IOException, InterruptedException {
-                return engine.calculate(input);
+            protected String doInBackground() throws IOException {
+                return client.calculate(input);
             }
 
             @Override
