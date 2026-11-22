@@ -12,7 +12,7 @@ My first release includes the C++ command-line calculator and the Java Swing des
 
 The calculation engine is written in C++ and runs from the command line. It understands operator precedence, parentheses, and unary minus, and gives clear errors when an expression is invalid or tries to divide by zero. My Java Swing desktop client runs the C++ program directly and displays its results or errors.
 
-I'll build a Java TCP server that runs the engine for several users at the same time. A thread pool will handle concurrent connections. I'll connect the Swing app to the server and build a second desktop client in C# with WPF. A Python command-line client will use the same protocol, sending an expression and receiving either a result or an error.
+I'll build a Java TCP server that runs the engine for several users at the same time. A thread pool will handle concurrent connections. I'll connect the Swing app to the server and build a second desktop client in C# with WPF. A Python command-line client will use the same protocol to send expressions and receive results or errors. [TCP protocol specification](docs/protocol.md)
 
 For the web version, I'll build a calculator in HTML, CSS, and JavaScript. It will send expressions to a PHP API, which will pass them to the Java server and return the result or error as JSON.
 
