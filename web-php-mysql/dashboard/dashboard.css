@@ -1,0 +1,162 @@
+:root {
+    color-scheme: dark;
+    font: 100% / 1.5 system-ui, sans-serif;
+    background: #0c1422;
+    color: #edf3fc;
+    --surface: #152134;
+    --line: #2b3d55;
+    --muted: #aebed4;
+    --accent: #8dc8ff;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+
+.container {
+    width: min(70rem, calc(100% - 2.5rem));
+    margin-inline: auto;
+}
+
+.topbar {
+    border-bottom: 1px solid var(--line);
+    background: #101a2b;
+}
+
+.wordmark {
+    padding-block: 0.85rem;
+    color: var(--accent);
+    font-size: 1.125rem;
+    font-weight: 750;
+}
+
+.content { padding-block: 1.75rem 3rem; }
+
+h1, h2, p, dl { margin: 0; }
+h1 {
+    margin-bottom: 1.35rem;
+    font-size: clamp(1.9rem, 4vw, 2.65rem);
+    font-weight: 740;
+    letter-spacing: -0.035em;
+    line-height: 1.15;
+}
+h2 { font-size: 1.125rem; line-height: 1.3; }
+
+.panel {
+    min-width: 0;
+    border: 1px solid var(--line);
+    border-radius: 0.8rem;
+    background: var(--surface);
+}
+
+.summary, .insights {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.insights { grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); }
+
+.metric, .insight, .notice { padding: 1.05rem 1.2rem; }
+.metric dt, .context, .empty, .notice p, .pagination { color: var(--muted); }
+.metric dt, .context, .count { font-size: 0.875rem; }
+.metric dd {
+    margin: 0.15rem 0 0;
+    font-size: clamp(1.4rem, 4vw, 2.15rem);
+    font-weight: 730;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+.context, .notice p { margin-top: 0.3rem; }
+
+.daily-chart, .frequent-list {
+    display: grid;
+    padding: 0;
+    margin: 0.85rem 0 0;
+    list-style: none;
+}
+.daily-chart { gap: 0.48rem; }
+.daily-chart li {
+    display: grid;
+    grid-template-columns: 4.2rem minmax(0, 1fr) auto;
+    gap: 0.65rem;
+    align-items: center;
+}
+.daily-chart time { color: var(--muted); font-size: 0.875rem; }
+.bar-track {
+    overflow: hidden;
+    height: 0.6rem;
+    border-radius: 1rem;
+    background: #253750;
+}
+.bar-track span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--accent);
+}
+.count { min-width: 2.6ch; text-align: right; font-variant-numeric: tabular-nums; }
+
+.frequent-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding-block: 0.5rem;
+    border-bottom: 1px solid var(--line);
+}
+.frequent-list li:last-child { border-bottom: 0; }
+.frequent-list code, .expression {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: pre;
+}
+code { font: 0.875rem / 1.5 ui-monospace, monospace; }
+
+.records h2, .records .empty { padding: 1rem 1.2rem; }
+.insight .empty { margin-top: 0.85rem; }
+.table-scroll { overflow-x: auto; }
+table { width: 100%; min-width: 42rem; border-collapse: collapse; text-align: left; }
+th, td { border-top: 1px solid var(--line); padding: 0.58rem 1.2rem; }
+th { color: var(--muted); font-size: 0.875rem; font-weight: 650; }
+td { font-size: 0.875rem; }
+td time, .client-ip { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.expression { max-width: clamp(14rem, 32vw, 29rem); }
+.status {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    border-radius: 0.3rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+.status-ok { background: #1e423c; color: #adf0d5; }
+.status-error { background: #472d3d; color: #ffc0cf; }
+
+.pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border-top: 1px solid var(--line);
+    padding: 0.75rem 1.2rem;
+}
+.pagination div { display: flex; gap: 0.5rem; }
+.pagination a {
+    padding: 0.32rem 0.65rem;
+    border: 1px solid var(--line);
+    border-radius: 0.4rem;
+    color: var(--accent);
+    text-decoration: none;
+}
+.pagination a:hover { background: #22354f; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+@media (max-width: 45rem) {
+    .container { width: calc(100% - 1.5rem); }
+    .summary, .insights { gap: 0.65rem; }
+    .insights { grid-template-columns: 1fr; }
+    .metric { padding: 0.75rem; }
+}

@@ -18,7 +18,7 @@ My PHP API accepts expressions over HTTP, forwards them to the Java server, and 
 
 ## Calculation history
 
-My Java server can save calculation history to MySQL through JDBC. It keeps answering requests during a database outage. The browser calculator will show a local history. A PHP dashboard will show the history across clients and let me see how often the calculator is used, which expressions are common, and how many requests return errors.
+My Java server can save calculation history to MySQL through JDBC. It keeps answering requests during a database outage. My PHP dashboard shows history across clients, daily activity, the most frequent expressions, and the error rate. The browser calculator will show a local history.
 
 ## What I want to test
 
@@ -162,3 +162,18 @@ curl -H 'Content-Type: application/json' \
 A successful request returns `{"result":"11"}` with status `200`. The result stays a string to preserve the engine's formatting. Errors return an `error` string. Use `400` for invalid input, `405` for another method, `413` for oversized requests, `415` for an invalid content type, and `422` for a calculation the Java server rejects. An unavailable or invalid upstream response returns `502`. A TCP read or write timeout returns `504`.
 
 The PHP API connects to `127.0.0.1:5050` by default. Set `MULTICALC_TCP_HOST` and `MULTICALC_TCP_PORT` before starting PHP to use another calculator server.
+
+## View the PHP dashboard
+
+Apply `database/schema.sql` and use PHP with the `pdo_mysql` extension. Start PHP with the dashboard's own database account, which needs `SELECT` access on `multicalc.calculations`.
+
+```bash
+export MULTICALC_DASHBOARD_DSN='mysql:host=127.0.0.1;port=3306;dbname=multicalc;charset=utf8mb4'
+export MULTICALC_DASHBOARD_USER='your_read_only_mysql_user'
+read -rsp 'MySQL password: ' MULTICALC_DASHBOARD_PASSWORD
+printf '\n'
+export MULTICALC_DASHBOARD_PASSWORD
+php -S 127.0.0.1:8080 -t web-php-mysql
+```
+
+Open `http://127.0.0.1:8080/dashboard/`. The dashboard charts the last seven UTC days, ranks the five most frequent expressions across all history, and shows 25 calculations per history page. Load `database/sample-data.sql` to explore it with example rows.
