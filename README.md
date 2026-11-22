@@ -12,7 +12,7 @@ My first release includes the C++ command-line calculator and the Java Swing des
 
 The calculation engine is written in C++ and runs from the command line. It understands operator precedence, parentheses, and unary minus, and gives clear errors when an expression is invalid or tries to divide by zero.
 
-My Java TCP server runs the same engine for several users at a time with a thread pool. My Java Swing and C# WPF desktop apps send expressions to the server and display the results or errors they receive. I'll add a Python command-line client that uses the same protocol. [TCP protocol specification](docs/protocol.md)
+My Java TCP server runs the same engine for several users at a time with a thread pool. My Java Swing and C# WPF desktop apps send expressions to the server and display the results or errors they receive. The Python load tester uses the same protocol. [TCP protocol specification](docs/protocol.md)
 
 For the web version, I'll build a calculator in HTML, CSS, and JavaScript. It will send expressions to a PHP API, which will pass them to the Java server and return the result or error as JSON.
 
@@ -22,7 +22,7 @@ I want the Java server to save calculations to MySQL through JDBC while continui
 
 ## What I want to test
 
-I use C++ unit tests to check parsing and arithmetic, and a Python regression runner to check the compiled calculator from the command line. I also want to simulate clients using the server at the same time and measure response times and errors. I'll use GitHub Actions to run the automated checks and keep notes on what I learn for my final exam.
+I use C++ unit tests to check parsing and arithmetic, and a Python regression runner to check the compiled calculator from the command line. I use the Python load tester to measure response times and errors when several clients use the server at once. I'll use GitHub Actions to run the automated checks and keep notes on what I learn for my final exam.
 
 ## Run the C++ calculator
 
@@ -97,3 +97,15 @@ dotnet run --project client-csharp/MultiCalc.Client.csproj
 ```
 
 Type an expression or use the keypad, then press Enter or `=`. The client connects to `127.0.0.1:5050` by default. To use a different server, append `--` followed by the host and port to the command.
+
+## Run the Python load tester
+
+With the Java TCP server running, use Python 3.9 or later from the repository root.
+
+```sh
+python3 tools-python/load_test.py --clients 10 --requests-per-client 10 --seed 123
+```
+
+Each client keeps its own connection and sends one expression at a time. Repeat with the same client count, request count, and seed to replay the workload. Use `--host` and `--port` to change the default endpoint `127.0.0.1:5050`.
+
+The report shows successful, failed, and skipped requests, throughput, and response times for successful calculations. A connection or protocol failure ends that client's session and skips any remaining requests. A failed or skipped request gives the command exit status `1`.
