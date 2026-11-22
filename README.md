@@ -18,7 +18,7 @@ I want the Java server to save calculations to MySQL through JDBC while continui
 
 ## What I want to test
 
-I use C++ unit tests to check parsing and arithmetic. I'll add Python tests for the command-line interface as the project grows. I also want to simulate clients using the server at the same time and measure response times and errors. I'll use GitHub Actions to run the automated checks and keep notes on what I learn for my final exam.
+I use C++ unit tests to check parsing and arithmetic, and a Python regression runner to check the compiled calculator from the command line. I also want to simulate clients using the server at the same time and measure response times and errors. I'll use GitHub Actions to run the automated checks and keep notes on what I learn for my final exam.
 
 ## Run the C++ calculator
 
@@ -42,3 +42,13 @@ g++ -std=c++17 -Icore-cpp core-cpp/tests/calculator_tests.cpp \
     core-cpp/parser.cpp core-cpp/calculator.cpp -o calc-tests
 ./calc-tests
 ```
+
+## Run the Python regression cases
+
+After building `calc`, run this command from the repository root.
+
+```sh
+python3 tools-python/regression.py ./calc tools-python/cases.txt
+```
+
+Each nonblank line in the case file contains an expression and its expected numeric result, such as `2+3*(4-1);11`. The runner compares results with a relative tolerance of `1e-12`, reports any failed case by line number, and exits with status `1` if a case fails or `2` if it cannot read the cases or launch the calculator.
