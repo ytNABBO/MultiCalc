@@ -4,9 +4,9 @@ I want to build a calculator that I can use from a desktop app, a terminal, or a
 
 I'm using this project to bring together the languages and tools I study at school. I want to see how a parser, a network service, a database, and different user interfaces can work together in one application.
 
-## v0.2.0
+## v0.3.0
 
-I can now run the C++ calculator as a network service and connect to it from either desktop app. The Java server handles concurrent sessions and reports per-client totals on shutdown. I can use the Python load tester to measure throughput and latency under concurrent requests.
+I can calculate in the browser using the same engine as the desktop clients. The Java server can save results to MySQL, and the PHP dashboard shows shared history, daily activity, and the error rate. The browser keeps its own recent calculations locally.
 
 ## How I want it to work
 
