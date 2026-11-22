@@ -4,9 +4,9 @@ I want to build a calculator that I can use from a desktop app, a terminal, or a
 
 I'm using this project to bring together the languages and tools I study at school. I want to see how a parser, a network service, a database, and different user interfaces can work together in one application.
 
-## v0.1.0
+## v0.2.0
 
-My first release includes the C++ command-line calculator and the Java Swing desktop client. The C++ unit tests check the parser and arithmetic, and the Python regression cases check the result printed by the compiled calculator. The build, run, and test commands are below.
+I can now run the C++ calculator as a network service and connect to it from either desktop app. The Java server handles concurrent sessions and reports per-client totals on shutdown. I can use the Python load tester to measure throughput and latency under concurrent requests.
 
 ## How I want it to work
 
