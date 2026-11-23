@@ -1,0 +1,59 @@
+name: CI
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  core-and-java:
+    name: C++ and Java
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Build the C++ calculator and unit tests
+        run: |
+          mkdir -p build/ci
+          g++ -std=c++17 -O2 -Wall -Wextra -Wpedantic -Werror \
+            core-cpp/main.cpp core-cpp/parser.cpp core-cpp/calculator.cpp -o build/ci/calc
+          g++ -std=c++17 -O2 -Wall -Wextra -Wpedantic -Werror -Icore-cpp \
+            core-cpp/tests/calculator_tests.cpp core-cpp/parser.cpp core-cpp/calculator.cpp \
+            -o build/ci/calc-tests
+
+      - name: Run C++ unit tests
+        run: ./build/ci/calc-tests
+
+      - name: Run Python CLI regression cases
+        run: python3 tools-python/regression.py ./build/ci/calc tools-python/cases.txt
+
+      - name: Build the Java server and Swing client
+        run: |
+          javac --release 17 -Xlint:all -Werror -d build/ci/server \
+            engine-java/src/multicalc/engine/*.java server-java/src/multicalc/server/*.java
+          javac --release 17 -Xlint:all -Werror -d build/ci/swing \
+            client-java/src/multicalc/client/*.java
+
+  wpf:
+    name: C# WPF
+    runs-on: windows-2025
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build the WPF client
+        run: dotnet build client-csharp/MultiCalc.Client.csproj --configuration Release -warnaserror
