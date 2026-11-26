@@ -35,7 +35,7 @@ g++ -std=c++17 core-cpp/main.cpp core-cpp/parser.cpp core-cpp/calculator.cpp -o 
 ./calc "2 + 3 * (4 - 1)"
 ```
 
-This prints `11`. The CLI takes one quoted expression and supports `+`, `-`, `*`, `/`, parentheses, unary minus, decimals, and scientific notation. It uses double-precision floating-point arithmetic. Errors go to stderr with exit status `1` for invalid calculations or `2` for incorrect usage.
+This prints `11`. The CLI takes one quoted expression of up to 4091 bytes and supports `+`, `-`, `*`, `/`, parentheses, unary minus, decimals, and scientific notation. It uses double-precision floating-point arithmetic. Errors go to stderr with exit status `1` for invalid calculations or `2` for incorrect usage.
 
 Inside `core-cpp/`, `main.cpp` handles command-line arguments and output, `parser.cpp` builds the expression tree defined in `expression.h`, and `calculator.cpp` evaluates it.
 
@@ -72,6 +72,8 @@ java -cp server-java/out multicalc.server.CalculatorServer
 The server listens on `127.0.0.1:5050` and runs `./calc` by default. The optional arguments are the port, path to `calc`, and bind address, in that order. Use port `0` to let the OS choose a free port. The server prints its listening address when it starts.
 
 Send `CALC 2+3*(4-1)` followed by a newline to receive `OK 11`. Send another request after reading the response. The server handles up to eight sessions at once and queues up to 128 waiting connections. An active session closes after five seconds of read inactivity. Press Ctrl+C to stop accepting connections and let calculations already underway finish.
+
+The server admits 100 calculations per second across all connections by default, with a burst capacity of 100. Set `MULTICALC_REQUESTS_PER_SECOND` to a positive integer to change both values. When the budget is exhausted, the server replies `ERR Rate limit exceeded` and keeps the connection open. The rejection happens before engine execution, history writes, or statistics updates. [Threat model](docs/threat-model.md)
 
 ### Server statistics
 
@@ -161,7 +163,7 @@ curl -H 'Content-Type: application/json' \
     http://127.0.0.1:8080/api/calculate.php
 ```
 
-A successful request returns `{"result":"11"}` with status `200`. The result stays a string to preserve the engine's formatting. Errors return an `error` string. Use `400` for invalid input, `405` for another method, `413` for oversized requests, `415` for an invalid content type, and `422` for a calculation the Java server rejects. An unavailable or invalid upstream response returns `502`. A TCP read or write timeout returns `504`.
+A successful request returns `{"result":"11"}` with status `200`. The result stays a string to preserve the engine's formatting. Errors return an `error` string. Use `400` for invalid input, `405` for another method, `413` for a JSON body over 32768 bytes or an expression over 4091 bytes, `415` for an invalid content type, and `422` for a calculation the Java server rejects. A rate-limited calculation returns `429` with `Retry-After: 1`. An unavailable or invalid upstream response returns `502`. A TCP read or write timeout returns `504`.
 
 The PHP API connects to `127.0.0.1:5050` by default. Set `MULTICALC_TCP_HOST` and `MULTICALC_TCP_PORT` before starting PHP to use another calculator server.
 

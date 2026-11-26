@@ -12,6 +12,10 @@ final class CalculationException extends RuntimeException
 {
 }
 
+final class CalculatorRateLimitException extends RuntimeException
+{
+}
+
 final class CalculatorTimeoutException extends RuntimeException
 {
 }
@@ -95,7 +99,11 @@ final class TcpCalculatorClient
     {
         if (preg_match('//u', $response) === 1 && preg_match('/[\r\x00]/', $response) === 0) {
             if (str_starts_with($response, 'ERR ') && strlen($response) > 4) {
-                throw new CalculationException(substr($response, 4));
+                $message = substr($response, 4);
+                if ($message === 'Rate limit exceeded') {
+                    throw new CalculatorRateLimitException($message);
+                }
+                throw new CalculationException($message);
             }
             if (str_starts_with($response, 'OK ')) {
                 $value = substr($response, 3);

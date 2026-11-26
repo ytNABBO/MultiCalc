@@ -26,6 +26,7 @@ public final class CalculatorServer implements AutoCloseable {
 
     private final ServerSocket listener;
     private final CalculatorEngine engine;
+    private final RequestRateLimiter rateLimiter;
     private final CalculationHistory history = CalculationHistory.fromEnvironment();
     private final ServerStats stats = new ServerStats();
     private final ExecutorService workers = new ThreadPoolExecutor(
@@ -33,9 +34,10 @@ public final class CalculatorServer implements AutoCloseable {
     private final Set<Socket> connections = ConcurrentHashMap.newKeySet();
     private final AtomicBoolean stopping = new AtomicBoolean();
 
-    private CalculatorServer(ServerSocket listener, CalculatorEngine engine) {
+    private CalculatorServer(ServerSocket listener, CalculatorEngine engine, RequestRateLimiter rateLimiter) {
         this.listener = listener;
         this.engine = engine;
+        this.rateLimiter = rateLimiter;
     }
 
     public static void main(String[] args) {
@@ -66,8 +68,9 @@ public final class CalculatorServer implements AutoCloseable {
         }
 
         var engine = new CalculatorEngine(executable);
+        var rateLimiter = RequestRateLimiter.fromEnvironment();
         var listener = new ServerSocket(port, QUEUE_CAPACITY, InetAddress.getByName(bindAddress));
-        try (var server = new CalculatorServer(listener, engine)) {
+        try (var server = new CalculatorServer(listener, engine, rateLimiter)) {
             Runtime.getRuntime().addShutdownHook(new Thread(server::close, "calculator-shutdown"));
             String host = listener.getInetAddress().getHostAddress();
             if (host.contains(":")) {
@@ -102,7 +105,7 @@ public final class CalculatorServer implements AutoCloseable {
 
     private void handle(Socket connection) {
         try {
-            new ClientSession(connection, engine, stats, history, stopping::get).run();
+            new ClientSession(connection, engine, rateLimiter, stats, history, stopping::get).run();
         } finally {
             connections.remove(connection);
         }

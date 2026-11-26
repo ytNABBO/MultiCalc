@@ -13,14 +13,16 @@ final class ClientSession implements Runnable {
 
     private final Socket socket;
     private final CalculatorEngine engine;
+    private final RequestRateLimiter rateLimiter;
     private final ServerStats stats;
     private final CalculationHistory history;
     private final BooleanSupplier stopping;
 
-    ClientSession(Socket socket, CalculatorEngine engine, ServerStats stats,
+    ClientSession(Socket socket, CalculatorEngine engine, RequestRateLimiter rateLimiter, ServerStats stats,
                   CalculationHistory history, BooleanSupplier stopping) {
         this.socket = socket;
         this.engine = engine;
+        this.rateLimiter = rateLimiter;
         this.stats = stats;
         this.history = history;
         this.stopping = stopping;
@@ -43,8 +45,10 @@ final class ClientSession implements Runnable {
                     if (request.closesConnection()) {
                         return;
                     }
-                } else {
+                } else if (rateLimiter.tryAcquire()) {
                     calculate(output, request.expression());
+                } else {
+                    Protocol.writeError(output, "Rate limit exceeded");
                 }
             }
         } catch (IOException disconnected) {

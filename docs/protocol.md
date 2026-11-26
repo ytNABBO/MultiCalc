@@ -21,6 +21,8 @@ The server returns one of these responses for each complete request within the s
 
 An unknown command, a missing separator, an empty expression, a forbidden character, invalid UTF-8, or a calculation error returns `ERR`. The connection remains open for another request.
 
+If the server's shared calculation rate budget is exhausted, it replies `ERR Rate limit exceeded`. The connection remains open and the client can retry after a delay. The server refills its budget continuously and accepts a burst of up to one second's worth of calculations when the budget is full.
+
 ## Connection limits
 
 A request can contain up to 4096 bytes, including the `CALC ` prefix and excluding the line ending. The server checks the size before decoding. When a request exceeds the limit, the server sends `ERR Request too long` if it can still write to the socket, then closes the connection.

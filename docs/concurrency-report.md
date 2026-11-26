@@ -31,6 +31,8 @@ All measured replies matched the expected values, and every session completed. T
 
 Build the C++ executable with `-O2` and start a fresh Java server on loopback. [Build and run instructions](../README.md#run-the-java-tcp-server)
 
+On versions with request rate limiting, start the benchmark server with `MULTICALC_REQUESTS_PER_SECOND=2000` so the test measures concurrency without hitting the default shared rate limit.
+
 Run the warm-up and measured trials sequentially from the repository root. If the server uses a different port, pass `--port` to each invocation.
 
 ```sh

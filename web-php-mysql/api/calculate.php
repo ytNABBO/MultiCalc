@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use MultiCalc\CalculationException;
+use MultiCalc\CalculatorRateLimitException;
 use MultiCalc\CalculatorTimeoutException;
 use MultiCalc\TcpCalculatorClient;
 
@@ -65,6 +66,9 @@ try {
     sendJson(400, ['error' => $error->getMessage()]);
 } catch (CalculationException $error) {
     sendJson(422, ['error' => $error->getMessage()]);
+} catch (CalculatorRateLimitException $error) {
+    header('Retry-After: 1');
+    sendJson(429, ['error' => $error->getMessage()]);
 } catch (CalculatorTimeoutException $error) {
     sendJson(504, ['error' => $error->getMessage()]);
 } catch (RuntimeException $error) {
