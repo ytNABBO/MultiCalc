@@ -12,9 +12,9 @@ I can calculate in the browser using the same engine as the desktop clients. The
 
 The calculation engine is written in C++ and runs from the command line. It understands operator precedence, parentheses, and unary minus, and gives clear errors when an expression is invalid or tries to divide by zero.
 
-My Java TCP server runs the same engine for several users at a time with a thread pool. My Java Swing and C# WPF desktop apps send expressions to the server and display the results or errors they receive. The Python load tester uses the same protocol. [TCP protocol specification](docs/protocol.md)
+My Java TCP server runs the same engine for several users at a time with a thread pool. My Java Swing and C# WPF desktop apps send expressions to the server and display the results or errors they receive. The Python load tester uses the same protocol.
 
-My browser calculator uses HTML, CSS, and JavaScript. It sends expressions to the PHP API, which forwards them to the Java server and returns results or errors as JSON.
+My browser calculator uses HTML, CSS, and JavaScript. It sends expressions to the PHP API, which forwards them to the Java server and returns results or errors as JSON. [Architecture diagram](docs/architecture.md) · [TCP protocol specification](docs/protocol.md)
 
 ## Calculation history
 
@@ -25,6 +25,20 @@ My Java server can save calculation history to MySQL through JDBC. It keeps answ
 I use C++ unit tests to check parsing and arithmetic, and a Python regression runner to check the compiled calculator from the command line. I use the Python load tester to measure response times and errors when several clients use the server at once. I'll keep notes on what I learn for my final exam.
 
 GitHub Actions builds the C++ calculator, Java server and Swing client, and C# WPF client on every push and pull request. It also runs the C++ unit tests and Python regression cases. [CI workflow](.github/workflows/ci.yml)
+
+## Local setup
+
+Run the commands from the root of your checkout. The server, database, and PHP examples use a Bash shell. Leave the Java TCP server and the PHP web server running in separate terminals while you use their clients.
+
+| To run | What you need |
+| --- | --- |
+| [C++ calculator](#run-the-c-calculator) and [unit tests](#run-the-c-unit-tests) | A C++17 compiler and standard library with floating-point `std::to_chars` |
+| [Java TCP server](#run-the-java-tcp-server) | The compiled C++ calculator and JDK 17 or later |
+| [Java Swing client](#run-the-java-swing-client) | A running TCP server, JDK 17 or later, and a graphical desktop |
+| [C# WPF client](#run-the-c-wpf-client) | A running TCP server, Windows, and the .NET 10 SDK |
+| [Python regression runner](#run-the-python-regression-cases) and [load tester](#run-the-python-load-tester) | Python 3.9 or later and either the compiled C++ calculator for regression or a running TCP server for load testing |
+| [Browser calculator](#run-the-browser-calculator) and [HTTP API](#run-the-php-calculator-api) | A running TCP server, PHP 8, and `curl` for the API example |
+| [Shared history](#set-up-mysql-history) and [dashboard](#view-the-php-dashboard) | MySQL 8.0.16 or later, Connector/J for Java writes, and PHP with `pdo_mysql` for dashboard reads |
 
 ## Run the C++ calculator
 
@@ -61,7 +75,7 @@ Each nonblank line in the case file contains an expression and its expected nume
 
 ## Run the Java TCP server
 
-Build `calc` first, then compile and start the server from the repository root with JDK 17 or later.
+Build `calc` first, then compile and start the server from the repository root with JDK 17 or later. [C++ build command](#run-the-c-calculator)
 
 ```sh
 javac --release 17 -d server-java/out \
@@ -71,7 +85,13 @@ java -cp server-java/out multicalc.server.CalculatorServer
 
 The server listens on `127.0.0.1:5050` and runs `./calc` by default. The optional arguments are the port, path to `calc`, and bind address, in that order. Use port `0` to let the OS choose a free port. The server prints its listening address when it starts.
 
-Send `CALC 2+3*(4-1)` followed by a newline to receive `OK 11`. Send another request after reading the response. The server handles up to eight sessions at once and queues up to 128 waiting connections. An active session closes after five seconds of read inactivity. Press Ctrl+C to stop accepting connections and let calculations already underway finish.
+To check the server from another terminal with netcat, send one request and look for `OK 11`.
+
+```sh
+printf 'CALC 2+3*(4-1)\n' | nc -w 2 127.0.0.1 5050
+```
+
+The server handles up to eight sessions at once and queues up to 128 waiting connections. An active session closes after five seconds of read inactivity. Press Ctrl+C to stop accepting connections and let calculations already underway finish.
 
 The server admits 100 calculations per second across all connections by default, with a burst capacity of 100. Set `MULTICALC_REQUESTS_PER_SECOND` to a positive integer to change both values. When the budget is exhausted, the server replies `ERR Rate limit exceeded` and keeps the connection open. The rejection happens before engine execution, history writes, or statistics updates. [Threat model](docs/threat-model.md)
 
@@ -90,7 +110,7 @@ javac --release 17 -d client-java/out client-java/src/multicalc/client/*.java
 java -cp client-java/out multicalc.client.CalculatorApp
 ```
 
-Type an expression or use the keypad, then press Enter or `=`. The client opens a connection for each calculation and uses `127.0.0.1:5050` by default. Pass the host and port as arguments to connect to another server.
+Type an expression or use the keypad, then press Enter or `=`. The client opens a connection for each calculation and uses `127.0.0.1:5050` by default. To use a different endpoint, append its host and port to the `java` command.
 
 ## Run the C# WPF client
 
@@ -100,7 +120,7 @@ With the TCP server running, use the .NET 10 SDK on Windows to launch the client
 dotnet run --project client-csharp/MultiCalc.Client.csproj
 ```
 
-Type an expression or use the keypad, then press Enter or `=`. The client connects to `127.0.0.1:5050` by default. To use a different server, append `--` followed by the host and port to the command.
+Type an expression or use the keypad, then press Enter or `=`. The client connects to `127.0.0.1:5050` by default. To use a different endpoint, append `--` followed by the host and port to `dotnet run`. For a client on a separate Windows machine, start the Java server with its reachable private address as the bind address. [Network access and trust assumptions](docs/threat-model.md#deployment-and-data-exposure)
 
 ## Run the Python load tester
 
@@ -132,13 +152,24 @@ mysql -u root -p < database/sample-data.sql
 
 The table defaults `created_at` to UTC and keeps successful results as the engine printed them, including signed zero and scientific notation. Failed calculations store `NULL` for `result`. Use `INET6_NTOA(client_ip)` to display the stored IPv4 or IPv6 address.
 
+### Create the history accounts
+
+For a local MySQL server, open a MySQL administrative session and run the statements below with your own passwords. Create the writer account for Java history and the reader account for the dashboard.
+
+```sql
+CREATE USER 'multicalc_writer'@'127.0.0.1' IDENTIFIED BY 'replace_with_writer_password';
+GRANT INSERT ON multicalc.calculations TO 'multicalc_writer'@'127.0.0.1';
+CREATE USER 'multicalc_reader'@'127.0.0.1' IDENTIFIED BY 'replace_with_reader_password';
+GRANT SELECT ON multicalc.calculations TO 'multicalc_reader'@'127.0.0.1';
+```
+
 ### Enable history in the Java server
 
-Apply the schema and build the Java server as above. Use a MySQL account with `INSERT` access to `multicalc.calculations` and add the JDBC driver to the runtime classpath. The example uses Connector/J 9.7.0. [Connector/J download](https://repo.maven.apache.org/maven2/com/mysql/mysql-connector-j/9.7.0/mysql-connector-j-9.7.0.jar)
+Apply the schema, create the writer account, and compile the Java TCP server as above. Stop the Java process if it is already running. Start it with the JDBC driver on the runtime classpath, replacing the JAR path in the command with your download location. The example uses Connector/J 9.7.0. [Connector/J download](https://repo.maven.apache.org/maven2/com/mysql/mysql-connector-j/9.7.0/mysql-connector-j-9.7.0.jar)
 
 ```bash
 export MULTICALC_DB_URL='jdbc:mysql://127.0.0.1:3306/multicalc'
-export MULTICALC_DB_USER='your_mysql_user'
+export MULTICALC_DB_USER='multicalc_writer'
 read -rsp 'MySQL password: ' MULTICALC_DB_PASSWORD
 printf '\n'
 export MULTICALC_DB_PASSWORD
@@ -147,13 +178,17 @@ java -cp 'server-java/out:/path/to/mysql-connector-j-9.7.0.jar' multicalc.server
 
 Set `MULTICALC_DB_URL` to enable persistence. A background writer opens one connection per insert and closes it afterward. Each row records the UTC time when the calculation finished. During an outage, the server keeps replying and skips failed writes. When MySQL recovers, new calculations can be saved again. The queue holds up to 128 waiting rows, and the server skips new rows if the queue fills. It gives queued writes up to five seconds to finish during shutdown.
 
-## Run the PHP calculator API
+## Start the PHP web server
 
-Start the Java TCP server. From the repository root, start a local PHP 8 server with `web-php-mysql` as its document root. With XAMPP on Linux, use `/opt/lampp/bin/php` for the PHP command.
+Use PHP 8 with `web-php-mysql` as the document root. A single PHP process serves the browser calculator, API, and dashboard. To enable dashboard reads, set its database environment variables in the same terminal before starting PHP. With XAMPP on Linux, use `/opt/lampp/bin/php` for the PHP command. [Dashboard configuration](#view-the-php-dashboard)
 
 ```sh
 php -S 127.0.0.1:8080 -t web-php-mysql
 ```
+
+## Run the PHP calculator API
+
+Start the Java TCP and PHP web servers. MySQL is optional for calculations. If Java listens at a different address or port than `127.0.0.1:5050`, set `MULTICALC_TCP_HOST` and `MULTICALC_TCP_PORT` before starting PHP. [Java TCP server setup](#run-the-java-tcp-server) · [PHP web server setup](#start-the-php-web-server)
 
 In another terminal, send a calculation to `POST /api/calculate.php`.
 
@@ -165,25 +200,22 @@ curl -H 'Content-Type: application/json' \
 
 A successful request returns `{"result":"11"}` with status `200`. The result stays a string to preserve the engine's formatting. Errors return an `error` string. Use `400` for invalid input, `405` for another method, `413` for a JSON body over 32768 bytes or an expression over 4091 bytes, `415` for an invalid content type, and `422` for a calculation the Java server rejects. A rate-limited calculation returns `429` with `Retry-After: 1`. An unavailable or invalid upstream response returns `502`. A TCP read or write timeout returns `504`.
 
-The PHP API connects to `127.0.0.1:5050` by default. Set `MULTICALC_TCP_HOST` and `MULTICALC_TCP_PORT` before starting PHP to use another calculator server.
-
 ## View the PHP dashboard
 
-Apply `database/schema.sql` and use PHP with the `pdo_mysql` extension. Start PHP with the dashboard's own database account, which needs `SELECT` access on `multicalc.calculations`.
+Apply the database schema, create the reader account, and use PHP with the `pdo_mysql` extension. If the PHP web server is running, stop it with Ctrl+C. Set these environment variables in the PHP server terminal. [MySQL setup](#set-up-mysql-history)
 
 ```bash
 export MULTICALC_DASHBOARD_DSN='mysql:host=127.0.0.1;port=3306;dbname=multicalc;charset=utf8mb4'
-export MULTICALC_DASHBOARD_USER='your_read_only_mysql_user'
+export MULTICALC_DASHBOARD_USER='multicalc_reader'
 read -rsp 'MySQL password: ' MULTICALC_DASHBOARD_PASSWORD
 printf '\n'
 export MULTICALC_DASHBOARD_PASSWORD
-php -S 127.0.0.1:8080 -t web-php-mysql
 ```
 
-Open `http://127.0.0.1:8080/dashboard/`. The dashboard charts the last seven UTC days, ranks the five most frequent expressions across all history, and shows 25 calculations per history page. Load `database/sample-data.sql` to explore it with example rows.
+Start PHP in that terminal and open `http://127.0.0.1:8080/dashboard/`. The dashboard charts the last seven UTC days, ranks the five most frequent expressions across all history, and shows 25 calculations per history page. It reads MySQL directly, so you can explore it with `database/sample-data.sql` before starting Java. [PHP web server command](#start-the-php-web-server)
 
 ## Run the browser calculator
 
-Start the Java TCP server and PHP server as above, then open `http://127.0.0.1:8080/`. Type an expression or use the keypad. Press Enter in the expression field or select `=` to calculate.
+Start the Java TCP and PHP web servers, then open `http://127.0.0.1:8080/`. Type an expression or use the keypad. Press Enter in the expression field or select `=` to calculate. [Java TCP server setup](#run-the-java-tcp-server) · [PHP web server setup](#start-the-php-web-server)
 
 The browser saves the last 20 successful calculations. Select a recent calculation to reuse its expression, or select **Clear history** to remove the saved calculations from this browser.
