@@ -1,0 +1,12 @@
+# C++ executables and GitHub Actions output
+/calc
+/calc-tests
+/build/ci/
+
+# Java compiler output
+/client-java/out/
+/server-java/out/
+
+# .NET SDK output
+/client-csharp/bin/
+/client-csharp/obj/
