@@ -19,7 +19,7 @@ The server replies to each complete request it processes with one of these lines
 | `OK <result>` | The result is a finite decimal number with `.` as the decimal separator. Scientific notation and signed zero are allowed. |
 | `ERR <message>` | The request or calculation failed. The prefix identifies the failure and the payload gives a nonempty message for display without CR, LF, or NUL. |
 
-The desktop clients and PHP API preserve the original result text, including signed zero. The Python load tester converts results to floating-point values for comparison.
+The desktop clients, PHP API, and Python command-line client preserve the original result text, including signed zero. The Python load tester shares the command-line client's TCP validation and converts results to floating-point values for comparison.
 
 An unknown command, a missing separator, an empty expression, a forbidden character, invalid UTF-8, or a calculation error returns `ERR`. The connection remains open for another request.
 

@@ -10,10 +10,14 @@ from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 
-from tcp_client import CalculationError, ProtocolError, calculate
-
-
-SOCKET_TIMEOUT_SECONDS = 10
+from tcp_client import (
+    DEFAULT_HOST,
+    DEFAULT_PORT,
+    SOCKET_TIMEOUT_SECONDS,
+    CalculationError,
+    ProtocolError,
+    calculate,
+)
 
 
 @dataclass
@@ -121,8 +125,8 @@ def positive_int(value):
 
 def main():
     parser = argparse.ArgumentParser(description="Measure the calculator server under concurrent TCP requests.")
-    parser.add_argument("--host", default="127.0.0.1", help="server hostname or IP address (default: %(default)s)")
-    parser.add_argument("--port", type=positive_int, default=5050, help="server port (default: %(default)s)")
+    parser.add_argument("--host", default=DEFAULT_HOST, help="server hostname or IP address (default: %(default)s)")
+    parser.add_argument("--port", type=positive_int, default=DEFAULT_PORT, help="server port (default: %(default)s)")
     parser.add_argument("--clients", type=positive_int, default=10, help="concurrent clients (default: %(default)s)")
     parser.add_argument("--requests-per-client", type=positive_int, default=10,
                         help="calculations per client (default: %(default)s)")

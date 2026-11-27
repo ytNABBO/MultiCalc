@@ -1,9 +1,14 @@
+import argparse
 import math
 import re
 import socket
+import sys
 from typing import BinaryIO
 
 
+DEFAULT_HOST = "127.0.0.1"
+DEFAULT_PORT = 5050
+SOCKET_TIMEOUT_SECONDS = 10
 MAX_LINE_BYTES = 4096
 REQUEST_PREFIX = "CALC "
 DECIMAL = re.compile(r"[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?")
@@ -32,9 +37,8 @@ def _encode_request(expression: str) -> bytes:
     return request + b"\n"
 
 
-def calculate(connection: socket.socket, responses: BinaryIO, expression: str) -> float:
-    """Send one calculation and read its reply on an open connection."""
-    connection.sendall(_encode_request(expression))
+def _exchange(connection: socket.socket, responses: BinaryIO, request: bytes) -> tuple[str, float]:
+    connection.sendall(request)
     line = responses.readline(MAX_LINE_BYTES + 2)
     payload = line.rstrip(b"\n")
     if len(payload) > MAX_LINE_BYTES:
@@ -55,5 +59,42 @@ def calculate(connection: socket.socket, responses: BinaryIO, expression: str) -
     if separator and prefix == "OK" and DECIMAL.fullmatch(result):
         value = float(result)
         if math.isfinite(value):
-            return value
+            return result, value
     raise ProtocolError("Invalid calculator response")
+
+
+def calculate(connection: socket.socket, responses: BinaryIO, expression: str) -> float:
+    """Send one calculation and read its numeric result on an open connection."""
+    _, value = _exchange(connection, responses, _encode_request(expression))
+    return value
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Evaluate one expression over the calculator TCP protocol.")
+    parser.add_argument("--host", default=DEFAULT_HOST, help="server hostname or IP address (default: %(default)s)")
+    parser.add_argument("--port", type=int, default=DEFAULT_PORT, help="server port (default: %(default)s)")
+    parser.add_argument("expression", help="arithmetic expression to evaluate")
+    options = parser.parse_args()
+    if not 1 <= options.port <= 65535:
+        parser.error("--port must be between 1 and 65535")
+    if not options.host.strip():
+        parser.error("--host must be a hostname or IP address")
+
+    try:
+        request = _encode_request(options.expression)
+        with socket.create_connection((options.host, options.port), SOCKET_TIMEOUT_SECONDS) as connection:
+            with connection.makefile("rb") as responses:
+                result, _ = _exchange(connection, responses, request)
+    except CalculationError as error:
+        print(f"Error: {error}", file=sys.stderr)
+        return 1
+    except (OSError, ProtocolError) as error:
+        print(f"Connection or protocol error: {error}", file=sys.stderr)
+        return 2
+
+    print(result)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

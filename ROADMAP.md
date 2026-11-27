@@ -51,6 +51,10 @@ The release history uses `main`. The initial plan proposed a `dev` branch and fe
 - [x] Tag `v1.0.0`.
 - [x] Prepare the oral-exam report from the project docs, release history, measured results, and live demo.
 
+## After v1.0.0
+
+- [x] Add the Python command-line TCP client for sending one expression from a terminal. [Usage](README.md#run-the-python-tcp-client)
+
 ## Future school topics
 
 These ideas can become `school-topic` issues as the corresponding topics come up in class.

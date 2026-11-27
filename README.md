@@ -14,7 +14,7 @@ Since v0.3.0, I’ve added automated builds and tests, a standalone CLI input li
 
 The calculation engine is written in C++ and runs from the command line. It understands operator precedence, parentheses, and unary minus, and gives clear errors when an expression is invalid or tries to divide by zero.
 
-My Java TCP server runs the same engine for several users at a time with a thread pool. My Java Swing and C# WPF desktop apps send expressions to the server and display the results or errors they receive. The Python load tester uses the same protocol.
+My Java TCP server runs the same engine for several users at a time with a thread pool. My Java Swing and C# WPF desktop apps send expressions to the server and display the results or errors they receive. The Python command-line client and load tester use the same protocol.
 
 My browser calculator uses HTML, CSS, and JavaScript. It sends expressions to the PHP API, which forwards them to the Java server and returns results or errors as JSON. [Architecture diagram](docs/architecture.md) · [TCP protocol specification](docs/protocol.md)
 
@@ -38,7 +38,8 @@ Run the commands from the root of your checkout. The server, database, and PHP e
 | [Java TCP server](#run-the-java-tcp-server) | The compiled C++ calculator and JDK 17 or later |
 | [Java Swing client](#run-the-java-swing-client) | A running TCP server, JDK 17 or later, and a graphical desktop |
 | [C# WPF client](#run-the-c-wpf-client) | A running TCP server, Windows, and the .NET 10 SDK |
-| [Python regression runner](#run-the-python-regression-cases) and [load tester](#run-the-python-load-tester) | Python 3.9 or later and either the compiled C++ calculator for regression or a running TCP server for load testing |
+| [Python regression runner](#run-the-python-regression-cases) | Python 3.9 or later and the compiled C++ calculator |
+| [Python TCP client](#run-the-python-tcp-client) and [load tester](#run-the-python-load-tester) | Python 3.9 or later and a running TCP server |
 | [Browser calculator](#run-the-browser-calculator) and [HTTP API](#run-the-php-calculator-api) | A running TCP server, PHP 8, and `curl` for the API example |
 | [Shared history](#set-up-mysql-history) and [dashboard](#view-the-php-dashboard) | MySQL 8.0.16 or later, Connector/J for Java writes, and PHP with `pdo_mysql` for dashboard reads |
 
@@ -123,6 +124,19 @@ dotnet run --project client-csharp/MultiCalc.Client.csproj
 ```
 
 Type an expression or use the keypad, then press Enter or `=`. The client connects to `127.0.0.1:5050` by default. To use a different endpoint, append `--` followed by the host and port to `dotnet run`. For a client on a separate Windows machine, start the Java server with its reachable private address as the bind address. [Network access and trust assumptions](docs/threat-model.md#deployment-and-data-exposure)
+
+## Run the Python TCP client
+
+With the Java TCP server running, use Python 3.9 or later from the repository root. The command-line client was added after `v1.0.0`.
+
+```sh
+python3 tools-python/tcp_client.py '2+3*(4-1)'
+python3 tools-python/tcp_client.py -- '-(2+3)'
+```
+
+The examples print `11` and `-5`. Put `--` before an expression that starts with a minus. The default endpoint is `127.0.0.1:5050`. Use `--host` and `--port` to select another endpoint.
+
+Successful calculations print the server's exact result text to stdout, including `-0`, and exit with status `0`. A server rejection prints its message to stderr and exits with status `1`. Invalid usage or a connection or protocol error gives exit status `2`.
 
 ## Run the Python load tester
 
