@@ -24,7 +24,7 @@ My Java server can save calculation history to MySQL through JDBC. It keeps answ
 
 ## What I want to test
 
-I use C++ unit tests to check parsing and arithmetic, and a Python regression runner to check the compiled calculator from the command line. I use the Python load tester to measure response times and errors when several clients use the server at once. I'll keep notes on what I learn for my final exam.
+I use C++ unit tests to check parsing and arithmetic, and a Python regression runner to check the compiled calculator from the command line. I use the Python load tester to measure response times and errors when several clients use the server at once. I keep the project milestones, benchmark results, and live demo together for my final exam. [Exam report](docs/exam-report.md)
 
 GitHub Actions builds the C++ calculator, Java server and Swing client, and C# WPF client on every push and pull request. It also runs the C++ unit tests and Python regression cases. [CI workflow](.github/workflows/ci.yml)
 
