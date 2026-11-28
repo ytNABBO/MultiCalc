@@ -34,7 +34,8 @@ The release history uses `main`. The initial plan proposed a `dev` branch and fe
 - [x] Define a UTF-8 line-based TCP protocol. [Protocol specification](docs/protocol.md) · [Issue #6](https://github.com/ytNABBO/MultiCalc/issues/6)
 - [x] Build a concurrent Java TCP server with a thread pool, socket timeouts, and graceful shutdown. [Issue #7](https://github.com/ytNABBO/MultiCalc/issues/7)
 - [x] Track successful and failed calculations globally and by client IP address with thread-safe counters. [Server statistics](README.md#server-statistics) · [Issue #8](https://github.com/ytNABBO/MultiCalc/issues/8)
-- [x] Connect the Swing and C# WPF clients to the server.
+- [x] Connect the Swing calculator to the Java TCP server. [Issue #9](https://github.com/ytNABBO/MultiCalc/issues/9)
+- [x] Build a C# WPF calculator client that uses the same TCP protocol. [Issue #10](https://github.com/ytNABBO/MultiCalc/issues/10)
 - [x] Use Python to measure errors and latency with 1, 10, 50, and 100 clients. [Concurrency report](docs/concurrency-report.md)
 - [x] Tag `v0.2.0`.
 
