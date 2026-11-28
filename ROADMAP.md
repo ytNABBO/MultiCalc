@@ -16,14 +16,16 @@ MultiCalc is a modular, concurrent calculator that brings together the languages
 
 - [x] Set up the public repository and its component directories.
 - [x] Document the project goal, architecture, setup, and roadmap. Ignore generated files from the documented build commands.
-- [ ] Set up a GitHub Project board with To Do, In Progress, and Done, and use Issues to track tasks.
+- [ ] Set up a GitHub Project board with To Do, In Progress, and Done.
+- [ ] Track roadmap tasks in GitHub Issues. The first two entries link work shipped in `v0.1.0` to the commits that implemented it.
 
 The release history uses `main`. The initial plan proposed a `dev` branch and feature branches. [Commit history](https://github.com/ytNABBO/MultiCalc/commits/main/) · [Issues](https://github.com/ytNABBO/MultiCalc/issues)
 
 ### Computational core and basic desktop
 
-- [x] Build a C++ command-line calculator with a recursive-descent parser, operator precedence, parentheses, unary minus, and clear errors.
-- [x] Cover parsing and arithmetic with C++ unit tests and a Python CLI regression runner.
+- [x] Build a C++ command-line calculator with a recursive-descent parser, operator precedence, parentheses, unary minus, and clear errors. [Issue #1](https://github.com/ytNABBO/MultiCalc/issues/1)
+- [x] Cover parsing and arithmetic with C++ unit tests. [Issue #2](https://github.com/ytNABBO/MultiCalc/issues/2)
+- [x] Exercise the compiled calculator with a Python CLI regression runner.
 - [x] Connect the first Swing client directly to the C++ executable through `ProcessBuilder`.
 - [x] Tag `v0.1.0` and document the build and run commands.
 
