@@ -17,7 +17,7 @@ The terminal invokes the C++ executable directly. Java Swing and C# WPF send a `
 | `v0.3.0` | `1a4395f` | MySQL history through JDBC, PHP API and dashboard, and a browser calculator with local history |
 | `v1.0.0` | `ccc8485` | GitHub Actions, input and rate limits, a threat model, and updated architecture and setup documentation |
 
-The tags and commit history record when each milestone shipped. The C++ engine and unit test issues in the roadmap link to the original implementation commits. [GitHub tags](https://github.com/ytNABBO/MultiCalc/tags) · [Commit history](https://github.com/ytNABBO/MultiCalc/commits/main/) · [Roadmap](../ROADMAP.md#computational-core-and-basic-desktop)
+The tags and commit history record when each milestone shipped. The roadmap links completed tasks to GitHub issues that cite their implementation commits. [GitHub tags](https://github.com/ytNABBO/MultiCalc/tags) · [Commit history](https://github.com/ytNABBO/MultiCalc/commits/main/) · [Roadmap](../ROADMAP.md#computational-core-and-basic-desktop)
 
 ## Engineering decisions and tradeoffs
 
