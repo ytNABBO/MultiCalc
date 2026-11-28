@@ -38,11 +38,11 @@ The release history uses `main`. The initial plan proposed a `dev` branch and fe
 - [x] Build a C# WPF calculator client that uses the same TCP protocol. [Issue #10](https://github.com/ytNABBO/MultiCalc/issues/10)
 - [x] Build a Python TCP load tester that checks results and measures throughput and latency. [Issue #11](https://github.com/ytNABBO/MultiCalc/issues/11)
 - [x] Document benchmark results and reproduction commands for 1, 10, 50, and 100 clients. [Concurrency report](docs/concurrency-report.md) · [Issue #12](https://github.com/ytNABBO/MultiCalc/issues/12)
-- [x] Tag `v0.2.0`.
+- [x] Tag `v0.2.0` and document the networked release. [Issue #13](https://github.com/ytNABBO/MultiCalc/issues/13)
 
 ### Data persistence and web integration
 
-- [x] Add the MySQL history schema and sample data.
+- [x] Add the MySQL history schema and sample data. [Issue #14](https://github.com/ytNABBO/MultiCalc/issues/14)
 - [x] Save outcomes through JDBC and keep the calculator responsive during database failures.
 - [x] Add a PHP JSON API and a dashboard for shared history, daily activity, common expressions, and error rate.
 - [x] Build the responsive browser calculator with `fetch` and local history.
