@@ -43,8 +43,9 @@ The release history uses `main`. The initial plan proposed a `dev` branch and fe
 ### Data persistence and web integration
 
 - [x] Add the MySQL history schema and sample data. [Issue #14](https://github.com/ytNABBO/MultiCalc/issues/14)
-- [x] Save outcomes through JDBC and keep the calculator responsive during database failures.
-- [x] Add a PHP JSON API and a dashboard for shared history, daily activity, common expressions, and error rate.
+- [x] Save outcomes through JDBC and keep the calculator responsive during database failures. [Issue #15](https://github.com/ytNABBO/MultiCalc/issues/15)
+- [x] Add a PHP JSON API that forwards calculations to the Java TCP server. [Issue #16](https://github.com/ytNABBO/MultiCalc/issues/16)
+- [x] Build a PHP dashboard for shared history, daily activity, common expressions, and error rate.
 - [x] Build the responsive browser calculator with `fetch` and local history.
 - [x] Tag `v0.3.0`.
 
