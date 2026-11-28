@@ -27,11 +27,11 @@ The release history uses `main`. The initial plan proposed a `dev` branch and fe
 - [x] Cover parsing and arithmetic with C++ unit tests. [Issue #2](https://github.com/ytNABBO/MultiCalc/issues/2)
 - [x] Exercise the compiled calculator with a Python CLI regression runner. [Issue #3](https://github.com/ytNABBO/MultiCalc/issues/3)
 - [x] Connect the first Swing client directly to the C++ executable through `ProcessBuilder`. [Issue #4](https://github.com/ytNABBO/MultiCalc/issues/4)
-- [x] Tag `v0.1.0` and document the build and run commands.
+- [x] Tag `v0.1.0` and document the build and run commands. [Issue #5](https://github.com/ytNABBO/MultiCalc/issues/5)
 
 ### Networking and concurrency
 
-- [x] Define a UTF-8 line-based TCP protocol. [Protocol specification](docs/protocol.md)
+- [x] Define a UTF-8 line-based TCP protocol. [Protocol specification](docs/protocol.md) · [Issue #6](https://github.com/ytNABBO/MultiCalc/issues/6)
 - [x] Build a concurrent Java TCP server with a thread pool, socket timeouts, graceful shutdown, and thread-safe statistics.
 - [x] Connect the Swing and C# WPF clients to the server.
 - [x] Use Python to measure errors and latency with 1, 10, 50, and 100 clients. [Concurrency report](docs/concurrency-report.md)
